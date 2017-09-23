@@ -1,10 +1,12 @@
-﻿/**
- * Created by thuan on 8/18/2017.
- */
-var Socket = new WebSocket("wss://socket.bittrex.com/signalr/connect?transport=webSockets&clientProtocol=1.5&connectionToken=55Fjf4aWwdI1Igznap5IJzqpwj1BcbpJHGd5VJBl9OrF2kEbR4%2BxZqrE1Rzs7ouxq3trOfLZFLWSND0fpHQMJbpcqE1Y0qyqxdWhDPXZ2L7YVOXBASsARvJtY5ql%2FnZkyi7FLQ%3D%3D&connectionData=%5B%7B%22name%22%3A%22corehub%22%7D%5D&tid=9");
+﻿var Socket = new WebSocket("wss://socket.bittrex.com/signalr/connect?transport=webSockets&clientProtocol=1.5&connectionToken=ahtJ7U5Ys9FFqKRfZT1fvo4JiSgxlgSGhyXUqf8PWWE9xB3YLdsM1dKj%2FMGiVBAW10hO6PDMzvjD2ObsRi0K6sv%2BEkrL3fjvDXU%2FbeeqCUChFyWWiNYgHMxK9HfpB759VRGZ9Q%3D%3D&connectionData=%5B%7B%22name%22%3A%22corehub%22%7D%5D&tid=10");
 var currentObj = {};
-var currentM1 = {}, currentM5 = {}, currentM15 = {}, currentM30 = {};
-var dem = 0;
+var eleObj = {};
+var currentS30 = [], currentM1 = [], currentM5 = {}, currentM15 = {}, currentM30 = {}, currentH1 = {}, currentH2 = {};
+var triggerM1 = false, triggerS30 = false;
+var countM = 5;
+var realtimeM1 = {};
+var arrayEle = ['S30', 'M1', 'M5', 'M15', 'M30', 'H1', 'H2'];
+
 
 $(document).ready(function () {
     var $table = $('#demo');
@@ -12,232 +14,357 @@ $(document).ready(function () {
         position: 'fixed'
     });
     // Socket.onmessage();
-
-    $('#hideMColumn').click(function () {
-        // $('th:nth-child(n+3):nth-child(-n+6)').hide();
+    $('#hideMPrice').click(function () {
+        $.each(arrayEle, function (index, value) {
+            $('.averagePrice' + value).each(function () {
+                $(this).toggle();
+            })
+        });
     });
+
+    $('#hideMVolume').click(function () {
+        $.each(arrayEle, function (index, value) {
+            $('.volume' + value).each(function () {
+                $(this).toggle();
+            })
+        });
+    });
+
+    $('#hideMOrderBuy').click(function () {
+        $.each(arrayEle, function (index, value) {
+            $('.openBuyOrder' + value).each(function () {
+                $(this).toggle();
+            })
+        });
+    });
+
+    $('#hideMOrderSell').click(function () {
+        // $('th:nth-child(n+3):nth-child(-n+6)').hide();
+        $.each(arrayEle, function (index, value) {
+            $('.openSellOrder' + value).each(function () {
+                $(this).toggle();
+            })
+        });
+    });
+    getMarket();
 });
-// console.log(Socket);
+
 Socket.onmessage = function (evt) {
-    var receiveData = evt.data;
-    var obj = JSON.parse(receiveData);
+    var obj = JSON.parse(evt.data);
     var preData;
 
-    if (obj === undefined || obj.M[0] === undefined) {
+    if (obj === undefined || $.isEmptyObject(obj)) {
+        //do nothing
+    }
+    else if (obj.M.length == 0) {
         //do nothing
     }
     else {
-
         preData = obj.M[0].A[0].Deltas;
-
-        //add data vào currentObj
-        for (var i = 0; i < preData.length; i++) {
-            currentObj[preData[i].MarketName] = preData[i];
-        }
 
         // console.log(currentObj["BTC-STRAT"].Last);
         console.log(Object.keys(currentObj).length + "current");
+        // console.log(Object.keys(currentM1).length + "M1");
+        // console.log(currentM1);
+        currentS30.push(preData);
+        currentM1.push(preData);
+        // console.log(currentM1);
 
-        if (dem == 0) {
-            setTimeout(function () {
-                currentM1 = JSON.parse(JSON.stringify(currentObj));
-                currentM5 = JSON.parse(JSON.stringify(currentObj));
-                currentM15 = JSON.parse(JSON.stringify(currentObj));
-                currentM30 = JSON.parse(JSON.stringify(currentObj));
-            }, 30000);
-            renderTable(currentObj);
-            $('tr').click(borderClick);
-            dem = 1;
+        if (triggerS30) {
+            renderTableMinutes(currentS30[0], '', 'S30', '.averagePrice', '.volume', '.openBuyOrder', '.openSellOrder');
+            currentS30.splice(0, 1);
         }
-        else {
-            renderTable(currentObj);
-            $('tr').click(borderClick);
+
+        if (triggerM1) {
+            renderTableMinutesFix(currentM1[0], 'S30', 'M1', '.averagePriceS30', '.volumeS30', '.openBuyOrderS30', '.openSellOrderS30', 'M5', '.openBuyOrderM1', '.openSellOrderM1', '.averagePriceM1', '.volumeM1');
+            currentM1.splice(0, 1);
+            // console.log("done");
         }
+
+        renderTable(preData);
+        // $('tr').click(borderClick);
+        // }
     }
 };
 
-function renderTable(currenObj) {
+function getMarket() {
+    $.get("https://cors.io/?https://files.coinmarketcap.com/generated/stats/global.json")
+        .then(function (data) {
+            var obj = JSON.parse(data);
+            var totalMarket = obj.total_market_cap_by_available_supply_usd.toLocaleString(
+                undefined, // use a string like 'en-US' to override browser locale
+                {minimumFractionDigits: 0}
+            );
+            var totalVol = obj.total_volume_usd.toLocaleString(
+                undefined, // use a string like 'en-US' to override browser locale
+                {minimumFractionDigits: 0}
+            );
 
-    for (key in currentObj) {
+            $('.totalMarket').text(totalMarket);
+            $('.totalVol').text(totalVol);
+            $('.totalPercent').text(obj.bitcoin_percentage_of_market_cap.toFixed(2));
+        });
+}
+function renderTable(current) {
 
-        if ($('#' + currentObj[key].MarketName).length == 0) {
-            $('#table').append("<tr id=" + currentObj[key].MarketName + "></tr>");
-            $('#' + currentObj[key].MarketName).append("<td class='name'><a target='_blank' " +
-                "href='https://bittrex.com/Market/Index?MarketName=" + currentObj[key].MarketName + "'>" + currentObj[key].MarketName + "</a></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='last'>" + currentObj[key].Last + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='priceM1'>" + ((currentM1[key] === undefined) ? "chua co data" : currentM1[key].Last) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='priceM5'>" + ((currentM5[key] === undefined) ? "chua co data" : currentM5[key].Last) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='priceM15'>" + ((currentM15[key] === undefined) ? "chua co data" : currentM15[key].Last) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='priceM30'>" + ((currentM30[key] === undefined) ? "chua co data" : currentM30[key].Last) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='volume'>" + currentObj[key].BaseVolume.toFixed(3) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='volumeM1'>" + ((currentM1[key] === undefined) ? "chua co data" : currentM1[key].BaseVolume) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='volumeM5'>" + ((currentM5[key] === undefined) ? "chua co data" : currentM5[key].BaseVolume) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='volumeM15'>" + ((currentM15[key] === undefined) ? "chua co data" : currentM15[key].BaseVolume) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='volumeM30'>" + ((currentM30[key] === undefined) ? "chua co data" : currentM30[key].BaseVolume) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openBuyOrder'>" + currentObj[key].OpenBuyOrders + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openBuyOrderM1'>" + ((currentM1[key] === undefined) ? "chua co data" : currentM1[key].OpenBuyOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openBuyOrderM5'>" + ((currentM5[key] === undefined) ? "chua co data" : currentM5[key].OpenBuyOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openBuyOrderM15'>" + ((currentM15[key] === undefined) ? "chua co data" : currentM15[key].OpenBuyOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openBuyOrderM30'>" + ((currentM30[key] === undefined) ? "chua co data" : currentM30[key].OpenBuyOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openSellOrder'>" + currentObj[key].OpenSellOrders + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openSellOrderM1'>" + ((currentM1[key] === undefined) ? "chua co data" : currentM1[key].OpenSellOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openSellOrderM5'>" + ((currentM5[key] === undefined) ? "chua co data" : currentM5[key].OpenSellOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openSellOrderM15'>" + ((currentM15[key] === undefined) ? "chua co data" : currentM15[key].OpenSellOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='openSellOrderM30'>" + ((currentM30[key] === undefined) ? "chua co data" : currentM30[key].OpenSellOrders) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='orderAlert'></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='high'>" + currentObj[key].High.toFixed(8) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='low'>" + currentObj[key].Low.toFixed(8) + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='ask'>" + currentObj[key].Ask + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='bid'>" + currentObj[key].Bid + "</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='spread'>" + spread(currentObj[key].Ask, currentObj[key].Bid, currentObj[key]) + "%</td>");
-            $('#' + currentObj[key].MarketName).append("<td class='changePrice'></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='priceAlert'></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='buyWall'></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='sellWall'></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='sumBuy'></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='sumSell'></td>");
-            $('#' + currentObj[key].MarketName).append("<td class='sumAlert'></td>");
+    $.each(current, function (key, value) {
+        // console.log(value.Last);
+        currentObj[value.MarketName] = value;
+        // eleObj[value.MarketName] = value;
+
+        if ($('#' + value.MarketName).length == 0) {
+            $('#table').append("<tr id=" + value.MarketName + "></tr>");
+            $('#' + value.MarketName).append("<td class='name'><a target='_blank' " + "href='https://bittrex.com/Market/Index?MarketName=" + value.MarketName + "'>" + value.MarketName + "</a></td>");
+            $('#' + value.MarketName).append("<td class='last'>" + value.Last + "</td>");
+
+            $('#' + value.MarketName).append("<td class='averagePrice'><span class='averageText'>" + averagePrice(value) + "</span><br><span class='conclude'></span></td>");
+            $('#' + value.MarketName).append("<td class='averagePriceS30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='averagePriceM1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='averagePriceM5'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='averagePriceM15'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='averagePriceM30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='averagePriceH1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='averagePriceH2'><span class='averageText'></span><br><span class='conclude'></td>");
+
+            $('#' + value.MarketName).append("<td class='prevDay'>" + prevDay(value) + "%</td>");
+
+            $('#' + value.MarketName).append("<td class='volume'><span class='averageText'>" + value.BaseVolume.toFixed(2) + "</span><br><span class='conclude'></span></td>");
+            $('#' + value.MarketName).append("<td class='volumeS30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='volumeM1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='volumeM5'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='volumeM15'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='volumeM30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='volumeH1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='volumeH2'><span class='averageText'></span><br><span class='conclude'></td>");
+
+            $('#' + value.MarketName).append("<td class='openBuyOrder'><span class='averageText'>" + value.OpenBuyOrders + "</span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openBuyOrderS30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openBuyOrderM1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openBuyOrderM5'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openBuyOrderM15'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openBuyOrderM30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openBuyOrderH1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openBuyOrderH2'><span class='averageText'></span><br><span class='conclude'></td>");
+
+            $('#' + value.MarketName).append("<td class='openSellOrder'><span class='averageText'>" + value.OpenSellOrders + "</span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openSellOrderS30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openSellOrderM1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openSellOrderM5'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openSellOrderM15'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openSellOrderM30'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openSellOrderH1'><span class='averageText'></span><br><span class='conclude'></td>");
+            $('#' + value.MarketName).append("<td class='openSellOrderH2'><span class='averageText'></span><br><span class='conclude'></td>");
+
+            $('#' + value.MarketName).append("<td class='orderAlert'></td>");
+            $('#' + value.MarketName).append("<td class='high'>" + value.High.toFixed(8) + "</td>");
+            $('#' + value.MarketName).append("<td class='low'>" + value.Low.toFixed(8) + "</td>");
+            $('#' + value.MarketName).append("<td class='ask'>" + value.Ask + "</td>");
+            $('#' + value.MarketName).append("<td class='bid'>" + value.Bid + "</td>");
+            $('#' + value.MarketName).append("<td class='spread'>" + spread(value.Ask, value.Bid, value) + "%</td>");
+            $('#' + value.MarketName).append("<td class='priceAlert'></td>");
+
+            eleObj[value.MarketName] = $('#' + value.MarketName);
         }
         else {
-            $('#' + currentObj[key].MarketName + " .last").text(currentObj[key].Last);
-            $('#' + currentObj[key].MarketName + " .priceM1").text(((currentM1[key] === undefined) ? "chua co data" : currentM1[key].Last) + " and " + priceColor(currentM1[key], currentObj[key], "priceM1", 0.5) + "%");
-            $('#' + currentObj[key].MarketName + " .priceM5").text(((currentM5[key] === undefined) ? "chua co data" : currentM5[key].Last) + " and " + priceColor(currentM5[key], currentM1[key], "priceM5", 0.5) + "%");
-            $('#' + currentObj[key].MarketName + " .priceM15").text(((currentM15[key] === undefined) ? "chua co data" : currentM15[key].Last) + " and " + priceColor(currentM15[key], currentM5[key], "priceM15", 0.5) + "%");
-            $('#' + currentObj[key].MarketName + " .priceM30").text(((currentM30[key] === undefined) ? "chua co data" : currentM30[key].Last) + " and " + priceColor(currentM30[key], currentM15[key], "priceM30", 0.5) + "%");
-            $('#' + currentObj[key].MarketName + " .volume").text(currentObj[key].BaseVolume.toFixed(3));
-            $('#' + currentObj[key].MarketName + " .volumeM1").text(((currentM1[key] === undefined) ? "chua co data" : currentM1[key].BaseVolume.toFixed(3)) + " and " + volumeColor(currentM1[key], currenObj[key], "volumeM1", 0.5) + "%");
-            $('#' + currentObj[key].MarketName + " .volumeM5").text(((currentM5[key] === undefined) ? "chua co data" : currentM5[key].BaseVolume.toFixed(3)) + " and " + volumeColor(currentM5[key], currentM1[key], "volumeM5", 0.5) + "%");
-            $('#' + currentObj[key].MarketName + " .volumeM15").text(((currentM15[key] === undefined) ? "chua co data" : currentM15[key].BaseVolume.toFixed(3)) + " and " + volumeColor(currentM15[key], currentM5[key], "volumeM15", 2) + "%");
-            $('#' + currentObj[key].MarketName + " .volumeM30").text(((currentM30[key] === undefined) ? "chua co data" : currentM30[key].BaseVolume.toFixed(3)) + " and " + volumeColor(currentM30[key], currentM15[key], "volumeM30", 5) + "%");
-            $('#' + currentObj[key].MarketName + " .openBuyOrder").text(currentObj[key].OpenBuyOrders);
-            $('#' + currentObj[key].MarketName + " .openBuyOrderM1").text(((currentM1[key] === undefined) ? "chua co data" : currentM1[key].OpenBuyOrders));
-            $('#' + currentObj[key].MarketName + " .openBuyOrderM5").text(((currentM5[key] === undefined) ? "chua co data" : currentM5[key].OpenBuyOrders));
-            $('#' + currentObj[key].MarketName + " .openBuyOrderM15").text(((currentM15[key] === undefined) ? "chua co data" : currentM15[key].OpenBuyOrders));
-            $('#' + currentObj[key].MarketName + " .openBuyOrderM30").text(((currentM30[key] === undefined) ? "chua co data" : currentM30[key].OpenBuyOrders));
-            $('#' + currentObj[key].MarketName + " .openSellOrder").text(currentObj[key].OpenSellOrders);
-            $('#' + currentObj[key].MarketName + " .openSellOrderM1").text(((currentM1[key] === undefined) ? "chua co data" : currentM1[key].OpenSellOrders));
-            $('#' + currentObj[key].MarketName + " .openSellOrderM5").text(((currentM5[key] === undefined) ? "chua co data" : currentM5[key].OpenSellOrders));
-            $('#' + currentObj[key].MarketName + " .openSellOrderM15").text(((currentM15[key] === undefined) ? "chua co data" : currentM15[key].OpenSellOrders));
-            $('#' + currentObj[key].MarketName + " .openSellOrderM30").text(((currentM30[key] === undefined) ? "chua co data" : currentM30[key].OpenSellOrders));
-            $('#' + currentObj[key].MarketName + " .orderAlert").text();
-            $('#' + currentObj[key].MarketName + " .high").text(currentObj[key].High.toFixed(8));
-            $('#' + currentObj[key].MarketName + " .low").text(currentObj[key].Low.toFixed(8));
-            $('#' + currentObj[key].MarketName + " .ask").text(currentObj[key].Ask);
-            $('#' + currentObj[key].MarketName + " .bid").text(currentObj[key].Bid);
-            $('#' + currentObj[key].MarketName + " .spread").text(spread(currentObj[key].Ask, currentObj[key].Bid, currentObj[key]) + "%");
-            $('#' + currentObj[key].MarketName + " .changePrice").text();
-            $('#' + currentObj[key].MarketName + " .priceAlert").text();
-            $('#' + currentObj[key].MarketName + " .buyWall").text();
-            $('#' + currentObj[key].MarketName + " .sellWall").text();
-            $('#' + currentObj[key].MarketName + " .sumBuy").text();
-            $('#' + currentObj[key].MarketName + " .sumSell").text();
-            $('#' + currentObj[key].MarketName + " .sumAlert").text();
-            priceAlert(currentObj[key]);
-            orderAlert(currentObj[key]);
-            orderColor(currenObj[key], currentM1[key], "openBuyOrderM1");
-            orderColor(currentM1[key], currentM5[key], "openBuyOrderM5");
-            orderColor(currentM5[key], currentM15[key], "openBuyOrderM15");
-            orderColor(currentM15[key], currentM30[key], "openBuyOrderM30");
+            eleObj[value.MarketName].children('.last').text(value.Last);
+            eleObj[value.MarketName].children('.averagePrice').children('.averageText').text(averagePrice(value));
+            // eleObj[value.MarketName].children('.averagePriceS30').text();
+            // eleObj[value.MarketName].children('.averagePriceM1').text();
+            eleObj[value.MarketName].children('.prevDay').text(prevDay(value) + "%");
+            eleObj[value.MarketName].children('.volume').children('.averageText').text(value.BaseVolume.toFixed(2));
+            // eleObj[value.MarketName].children('.volumeM1').text();
+            eleObj[value.MarketName].children('.openBuyOrder').children('.averageText').text(value.OpenBuyOrders);
+            // eleObj[value.MarketName].children('.openBuyOrderM1').text();
+            eleObj[value.MarketName].children('.openSellOrder').children('.averageText').text(value.OpenSellOrders);
+            // eleObj[value.MarketName].children('.openSellOrderM1').text();
+            eleObj[value.MarketName].children('.high').text(value.High.toFixed(8));
+            eleObj[value.MarketName].children('.low').text(value.Low.toFixed(8));
+            eleObj[value.MarketName].children('.ask').text(value.Ask);
+            eleObj[value.MarketName].children('.spread').text(spread(value.Ask, value.Bid, value) + "%");
 
-            orderSellColor(currentObj[key], currentM1[key], "openSellOrderM1");
-            orderSellColor(currentM1[key], currentM5[key], "openSellOrderM5");
-            orderSellColor(currentM5[key], currentM15[key], "openSellOrderM15");
-            orderSellColor(currentM15[key], currentM30[key], "openSellOrderM30");
-
-            // priceColor(currentM1[key], currentM5[key], "priceM5");
+            priceAlert(value);
+            orderAlert(value);
         }
-
-    }
+    });
 }
 
-goSave();
+setTimeout(function () {
+    triggerS30 = true;
+}, 30000);
+setTimeout(function () {
+    triggerM1 = true;
+}, 60000);
+setTimeout(function () {
+    currentM5 = R.clone(currentObj);
+    currentM15 = R.clone(currentObj);
+    currentM30 = R.clone(currentObj);
+    currentH1 = R.clone(currentObj);
+    currentH2 = R.clone(currentObj);
+    goM5();
+}, 300000);
 
-function priceColor(obj, objM, classname, percent) {
-    if (obj === undefined || objM === undefined) {
+function renderTableMinutes(currentM, classrender, classname, classprice, classvolume, classopenbuy, classopensell) {
+    $.each(currentM, function (key, value) {
+        eleObj[value.MarketName].children('.averagePrice' + classname).children('.averageText').text(averagePrice(value));
+        eleObj[value.MarketName].children('.volume' + classname).children('.averageText').text(value.BaseVolume.toFixed(2));
+        eleObj[value.MarketName].children('.openBuyOrder' + classname).children('.averageText').text(value.OpenBuyOrders);
+        eleObj[value.MarketName].children('.openSellOrder' + classname).children('.averageText').text(value.OpenSellOrders);
+
+        averageColor(Number(eleObj[value.MarketName].children('.averagePrice' + classrender).children('.averageText').text()), averagePrice(value), value, classprice, 0.5);
+        averageColor(Number(eleObj[value.MarketName].children('.volume' + classrender).children('.averageText').text()), value.BaseVolume, value, classvolume, 0.4);
+        BuyColor(Number(eleObj[value.MarketName].children('.openBuyOrder' + classrender).children('.averageText').text()), value.OpenBuyOrders, value, classopenbuy);
+        SellColor(Number(eleObj[value.MarketName].children('.openSellOrder' + classrender).children('.averageText').text()), value.OpenSellOrders, value, classopensell);
+        alertPump(value);
+    });
+}
+
+function renderTableMinutesFix(currentM, classrender, classname, classprice, classvolume, classopenbuy, classopensell, classrenderlast, classopenbuylast, classopenselllast, classaveragelast, classvolumelast) {
+    $.each(currentM, function (key, value) {
+        eleObj[value.MarketName].children('.averagePrice' + classname).children('.averageText').text(averagePrice(value));
+        eleObj[value.MarketName].children('.volume' + classname).children('.averageText').text(value.BaseVolume.toFixed(2));
+        eleObj[value.MarketName].children('.openBuyOrder' + classname).children('.averageText').text(value.OpenBuyOrders);
+        eleObj[value.MarketName].children('.openSellOrder' + classname).children('.averageText').text(value.OpenSellOrders);
+
+        averageColor(Number(eleObj[value.MarketName].children('.averagePrice' + classrender).children('.averageText').text()), averagePrice(value), value, classprice, 0.5);
+        averageColor(averagePrice(value), Number(eleObj[value.MarketName].children('.averagePrice' + classrenderlast).children('.averageText').text()), value, classaveragelast, 0.5);
+
+        averageColor(Number(eleObj[value.MarketName].children('.volume' + classrender).children('.averageText').text()), value.BaseVolume, value, classvolume, 0.4);
+        averageColor(value.BaseVolume, Number(eleObj[value.MarketName].children('.volume' + classrenderlast).children('.averageText').text()), value, classvolumelast, 0.4);
+
+        BuyColor(Number(eleObj[value.MarketName].children('.openBuyOrder' + classrender).children('.averageText').text()), value.OpenBuyOrders, value, classopenbuy);
+        BuyColor(value.OpenBuyOrders, Number(eleObj[value.MarketName].children('.openBuyOrder' + classrenderlast).children('.averageText').text()), value, classopenbuylast);
+
+        SellColor(Number(eleObj[value.MarketName].children('.openSellOrder' + classrender).children('.averageText').text()), value.OpenSellOrders, value, classopensell);
+        SellColor(value.OpenSellOrders, Number(eleObj[value.MarketName].children('.openSellOrder' + classrenderlast).children('.averageText').text()), value, classopenselllast);
+    });
+}
+
+function goM5() {
+    setInterval(function () {
+        getMarket();
+        renderTableMinutesFix(currentM5, 'M1', 'M5', '.averagePriceM1', '.volumeM1', '.openBuyOrderM1', '.openSellOrderM1', 'M15', '.openBuyOrderM5', '.openSellOrderM5', '.averagePriceM5', '.volumeM5');
+        currentM5 = R.clone(currentObj);
+        console.log(Object.keys(currentM5).length + "M5 repeat");
+        if (countM % 15 == 0) {
+            renderTableMinutesFix(currentM15, 'M5', 'M15', '.averagePriceM5', '.volumeM5', '.openBuyOrderM5', '.openSellOrderM5', 'M30', '.openBuyOrderM15', '.openSellOrderM15', '.averagePriceM15', '.volumeM15');
+            currentM15 = R.clone(currentObj);
+        }
+        if (countM % 30 == 0) {
+            renderTableMinutesFix(currentM30, 'M15', 'M30', '.averagePriceM15', '.volumeM15', '.openBuyOrderM15', '.openSellOrderM15', 'H1', '.openBuyOrderM30', '.openSellOrderM30', '.averagePriceM30', '.volumeM30');
+            currentM30 = R.clone(currentObj);
+        }
+        if (countM % 60 == 0) {
+            renderTableMinutesFix(currentH1, 'M30', 'H1', '.averagePriceM30', '.volumeM30', '.openBuyOrderM30', '.openSellOrderM30', 'H2', '.openBuyOrderH1', '.openBuyOrderH1', '.averagePriceH1', '.volumeH1');
+            currentH1 = R.clone(currentObj);
+        }
+        if (countM % 120 == 0) {
+            renderTableMinutes(currentH2, 'H1', 'H2', '.averagePriceH1', '.volumeH1', '.openBuyOrderH1', '.openSellOrderH1');
+            currentH2 = R.clone(currentObj);
+        }
+        countM += 5;
+    }, 300000);
+}
+
+function deleteColor(marketname, classname) {
+    $('#' + marketname + " " + classname).removeClass("green-color");
+    $('#' + marketname + " " + classname).removeClass("danger-color");
+    $('#' + marketname + " " + classname).removeClass("info-color");
+    // $('#' + marketname + " ." + classname).text();
+}
+
+function prevDay(obj) {
+    if (obj === undefined) {
         //do nothing
     }
     else {
-        $('#' + obj.MarketName + ' .' + classname).removeClass("green-color");
-        $('#' + obj.MarketName + ' .' + classname).removeClass("danger-color");
-        $('#' + obj.MarketName + ' .' + classname).removeClass("warning-color");
-        var temp = ((100 / obj.Last * objM.Last) - 100).toFixed(2);
-        // console.log(temp);
-        if (temp > percent) {
-            $('#' + obj.MarketName + " ." + classname).addClass("green-color");
+        deleteColor(obj.MarketName, ".prevDay");
+        var temp = ((100 / obj.PrevDay * obj.Last) - 100).toFixed(1);
+        if (temp >= 10) {
+            $('#' + obj.MarketName + " .prevDay").addClass("green-color");
             return temp;
+        }
+        if (temp <= -10) {
+            $('#' + obj.MarketName + " .prevDay").addClass("danger-color");
+            return temp;
+        }
+        return temp;
+    }
+}
+
+function averagePrice(obj) {
+    return ((obj.Bid + obj.Ask) / 2).toFixed(8);
+}
+
+function averageColor(number, numberS, obj, classname, percent) {
+    if (obj === undefined) {
+        //do nothing
+    }
+    else {
+        deleteColor(obj.MarketName, classname);
+        var temp = ((100 / numberS * number) - 100).toFixed(2);
+        if (temp > percent) {
+            eleObj[obj.MarketName].children(classname).addClass("green-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text("Tăng " + temp + "%");
         }
         else if (temp < (-1 * percent)) {
-            $('#' + obj.MarketName + " ." + classname).addClass("danger-color");
-            return temp;
+            eleObj[obj.MarketName].children(classname).addClass("danger-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text("Giảm " + temp + "%");
         }
         else {
-            $('#' + obj.MarketName + " ." + classname).addClass("warning-color");
-            return temp;
+            eleObj[obj.MarketName].children(classname).addClass("info-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text("Chênh " + temp + "%");
         }
     }
 }
 
-function volumeColor(obj, objM, classname, percent) {
-    if (obj === undefined || objM === undefined) {
+function BuyColor(number, numberS, obj, classname) {
+    if (obj === undefined) {
         //do nothing
     }
     else {
-        $('#' + obj.MarketName + ' .' + classname).removeClass("green-color");
-        $('#' + obj.MarketName + ' .' + classname).removeClass("danger-color");
-        $('#' + obj.MarketName + ' .' + classname).removeClass("warning-color");
-        var temp = ((100 / obj.BaseVolume * objM.BaseVolume) - 100).toFixed(2);
-        // console.log(temp);
-        if (temp > percent) {
-            $('#' + obj.MarketName + " ." + classname).addClass("green-color");
-            return temp;
+        deleteColor(obj.MarketName, classname);
+        var temp = number - numberS;
+        if (number > numberS) {
+            eleObj[obj.MarketName].children(classname).addClass("green-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text(" Tăng " + temp);
         }
-        else if (temp < (-1 * percent)) {
-            $('#' + obj.MarketName + " ." + classname).addClass("danger-color");
-            return temp;
+        else if (number < numberS) {
+            eleObj[obj.MarketName].children(classname).addClass("danger-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text(" Giảm " + Math.abs(temp));
         }
         else {
-            $('#' + obj.MarketName + " ." + classname).addClass("warning-color");
-            return temp;
+            eleObj[obj.MarketName].children(classname).addClass("info-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text('');
         }
     }
 }
 
-function orderColor(obj, objM, classname) {
-    if (obj === undefined || objM === undefined) {
+function SellColor(number, numberS, obj, classname) {
+    if (obj === undefined) {
         //do nothing
     }
     else {
-        $('#' + obj.MarketName + " ." + classname).removeClass("success-color");
-        $('#' + obj.MarketName + " ." + classname).removeClass("danger-color");
-        $('#' + obj.MarketName + " ." + classname).removeClass("warning-color");
-        if (obj.OpenBuyOrders > objM.OpenBuyOrders)
-            $('#' + obj.MarketName + " ." + classname).addClass("success-color");
-        else if (obj.OpenBuyOrders == objM.OpenBuyOrders)
-            $('#' + obj.MarketName + " ." + classname).addClass("warning-color");
-        else $('#' + obj.MarketName + " ." + classname).addClass("danger-color");
-    }
-}
-
-function orderSellColor(obj, objM, classname) {
-    if (obj === undefined || objM === undefined) {
-        //do nothing
-    }
-    else {
-        $('#' + obj.MarketName + " ." + classname).removeClass("success-color");
-        $('#' + obj.MarketName + " ." + classname).removeClass("danger-color");
-        $('#' + obj.MarketName + " ." + classname).removeClass("warning-color");
-        if (obj.OpenSellOrders > objM.OpenSellOrders)
-            $('#' + obj.MarketName + " ." + classname).addClass("danger-color");
-        else if (obj.OpenSellOrders == objM.OpenSellOrders)
-            $('#' + obj.MarketName + " ." + classname).addClass("warning-color");
-        else $('#' + obj.MarketName + " ." + classname).addClass("success-color");
+        deleteColor(obj.MarketName, classname);
+        var temp = number - numberS;
+        if (number < numberS) {
+            eleObj[obj.MarketName].children(classname).addClass("green-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text(" Giảm " + Math.abs(temp));
+        }
+        else if (number > numberS) {
+            eleObj[obj.MarketName].children(classname).addClass("danger-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text(" Tăng " + temp);
+        }
+        else {
+            eleObj[obj.MarketName].children(classname).addClass("info-color");
+            eleObj[obj.MarketName].children(classname).children('.conclude').text('');
+        }
     }
 }
 
 function spread(number1, number2, obj) {
-    $('#' + obj.MarketName + " .spread").removeClass("success-color");
+    $('#' + obj.MarketName + " .spread").removeClass("green-color");
     if (((100 * Math.max(number1, number2)) / Math.min(number1, number2) - 100).toFixed(2) >= 5) {
-        $('#' + obj.MarketName + " .spread").addClass("success-color");
+        $('#' + obj.MarketName + " .spread").addClass("green-color");
         return ((100 * Math.max(number1, number2)) / Math.min(number1, number2) - 100).toFixed(2);
     }
     else {
@@ -246,26 +373,20 @@ function spread(number1, number2, obj) {
 }
 
 function priceAlert(obj) {
+    deleteColor(obj.MarketName, '.priceAlert');
     if (obj.Last <= obj.Low) {
-        $('#' + obj.MarketName + " .priceAlert").addClass("success-color");
-        $('#' + obj.MarketName + " .priceAlert").html("Đáy mới <br>" + obj.Last);
+        $('#' + obj.MarketName + " .priceAlert").addClass("green-color").text("Đáy mới \n" + obj.Last);
     }
     else if (obj.Last >= obj.High) {
-        $('#' + obj.MarketName + " .priceAlert").addClass("warning-color");
-        $('#' + obj.MarketName + " .priceAlert").html("Đỉnh mới <br>" + obj.Last);
-        // $('#' + obj.MarketName + " .priceAlert").css({"background": "#ED2027"});
+        $('#' + obj.MarketName + " .priceAlert").addClass("info-color").text("Đỉnh mới \n" + obj.Last);
     }
 }
 
 function orderAlert(obj) {
-    $('#' + obj.MarketName + " .orderAlert").removeClass("success-color");
-    if ((obj.OpenBuyOrders - obj.OpenSellOrders) >= 0) {
-        $('#' + obj.MarketName + " .orderAlert").addClass("success-color");
-        $('#' + obj.MarketName + " .orderAlert").text("Strong Buy");
-    }
-    else {
-        $('#' + obj.MarketName + " .orderAlert").text("");
-    }
+    if ((obj.OpenBuyOrders - obj.OpenSellOrders) >= 0)
+        $('#' + obj.MarketName + ' .orderAlert').addClass("green-color").text("Strong buy");
+    else
+        $('#' + obj.MarketName + ' .orderAlert').removeClass("green-color").text('');
 }
 
 function borderClick() {
@@ -273,32 +394,16 @@ function borderClick() {
     $(this).addClass("border-blue");
 }
 
-function goSave() {
-    setInterval(function () {
-        currentM1 = JSON.parse(JSON.stringify(currentObj));
-        console.log(Object.keys(currentM1).length + "local1");
-    }, 60000);
-    setInterval(function () {
-        currentM5 = JSON.parse(JSON.stringify(currentM1));
-        console.log(Object.keys(currentM5).length + "local2");
-    }, 240000);
-    setInterval(function () {
-        currentM15 = JSON.parse(JSON.stringify(currentM5));
-        console.log(Object.keys(currentM15).length + "local3");
-    }, 600000);
-    setInterval(function () {
-        currentM30 = JSON.parse(JSON.stringify(currentM15));
-        console.log(Object.keys(currentM30).length + "local4");
-    }, 900000);
-    // renderCurrentLocal(currentM1);
-}
+function alertPump(obj) {
+    if (eleObj[obj.MarketName].children('.volumeS30').hasClass('green-color')
+        && eleObj[obj.MarketName].children('.openBuyOrderS30').hasClass('green-color')
+        && eleObj[obj.MarketName].children('.openSellOrderS30').hasClass('green-color')) {
+        $.notify(obj.MarketName + " Đang tăng từ giá " + obj.Last, "success");
+    }
 
-function hidecolumn() {
-    $('#priceM1').hide();
-    $('#priceM5').hide();
-    $('#priceM15').hide();
-    $('#priceM30').hide();
+    if (eleObj[obj.MarketName].children('.volumeS30').hasClass('danger-color')
+        && eleObj[obj.MarketName].children('.openBuyOrderS30').hasClass('danger-color')
+        && eleObj[obj.MarketName].children('.openSellOrderS30').hasClass('danger-color')) {
+        $.notify(obj.MarketName + " Đang Giảm từ giá " + obj.Last, "warn");
+    }
 }
-
-// $('h2').text(localStorage.getItem("currentM1").Last);
-// }

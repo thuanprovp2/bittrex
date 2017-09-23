@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bollinger Band Alert Daily</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="assets/js/notify.js"></script>
+    <script src="bower_components/jquery.floatThead/dist/jquery.floatThead.js"></script>
+    <script src="bower_components/ramda/dist/ramda.js"></script>
+    <script src="assets/js/bollingerBand-day.js"></script>
+</head>
+<body>
+
+<table class="table table-striped table-condensed table-bordered" style="margin-left: 0; width: 100%;"
+       id="demo">
+    <thead>
+    <tr>
+        <th> Name</th>
+        <th> Last Price</th>
+        <th> SMA 20</th>
+        <th> Upper Band </th>
+        <th> Lower Band </th>
+    </tr>
+    </thead>
+    <!--page 1-->
+    <tbody id="table">
+    </tbody>
+</table>
+
+</body>
+</html>

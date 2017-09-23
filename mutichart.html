@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Muti Chart</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/js/bootstrap.js">
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <style>
+        iframe {
+            border: none;
+            width: 100%;
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body>
+<script>
+</script>
+<div class="form-inline col-md-12">
+    <label>Nhập Cặp Coin:</label>
+    <input type="text" class="form-control" id="nameCoin" value="BTC-ETH" pattern="^(btc|BTC)-[a-zA-Z]+">
+    <button class="btn btn-success add">Thêm</button>
+    <button class="btn btn-danger delete">Xóa</button>
+    <p class="test"></p>
+</div>
+<div class="content">
+</div>
+<script>
+    $(document).ready(function () {
+        $('.add').click(function () {
+            var coin = $('#nameCoin').val().toUpperCase();
+            if ($('#' + coin).length == 0) {
+                var link = "https://bittrex.com/market/MarketStandardChart?marketName=" + coin;
+                $('.content').append("<div class='col-md-6' id='" + coin + "'><iframe src='" + link + "'></iframe></div>");
+            }
+            else {
+                //do nothing
+            }
+        });
+
+        $('.delete').click(function () {
+            var coin = $('#nameCoin').val().toUpperCase();
+            if ($('#' + coin).length == 0) {
+                //do nothing
+            }
+            else {
+                $('#' + coin).remove();
+            }
+        });
+    });
+</script>
+</body>
+</html>
