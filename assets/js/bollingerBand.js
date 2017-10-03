@@ -1,7 +1,7 @@
 /**
  * Created by thuan on 9/19/2017.
  */
-var Socket = new WebSocket("wss://socket.bittrex.com/signalr/connect?transport=webSockets&clientProtocol=1.5&connectionToken=pshj7pdH1eXBGKVEFRvvq81e%2F0J6V201m7uVRGAlEgiUM3qAvkyKjVHNQtEhc%2Fdvx8pXzqarx%2F6sPuRy5psmtNHRIUobeawZckb0%2F%2BTHv7uzYYAHE37uR1faTQxpEQXpdNv9RA%3D%3D&connectionData=%5B%7B%22name%22%3A%22corehub%22%7D%5D&tid=9");
+var Socket = new WebSocket("wss://socket.bittrex.com/signalr/connect?transport=webSockets&clientProtocol=1.5&connectionToken=fhHkCFkSy6MWkof5J20wBE2gHjjVtJjD8lrzjs%2BcNccUWKwZ4bzTfrzgo3iGbGfYzrN0gSSYlWrkN%2FqB9n9MAfZ9h8lJQ%2BkM5LiVTTA1a9uHIJ0qPYS5fCC%2B1Vp39TSZgNWgdA%3D%3D&connectionData=%5B%7B%22name%22%3A%22corehub%22%7D%5D&tid=7");
 var eleObj = {};
 var listData = {};
 var loadFullData = false;

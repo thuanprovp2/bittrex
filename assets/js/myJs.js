@@ -1,4 +1,4 @@
-﻿var Socket = new WebSocket("wss://socket.bittrex.com/signalr/connect?transport=webSockets&clientProtocol=1.5&connectionToken=ahtJ7U5Ys9FFqKRfZT1fvo4JiSgxlgSGhyXUqf8PWWE9xB3YLdsM1dKj%2FMGiVBAW10hO6PDMzvjD2ObsRi0K6sv%2BEkrL3fjvDXU%2FbeeqCUChFyWWiNYgHMxK9HfpB759VRGZ9Q%3D%3D&connectionData=%5B%7B%22name%22%3A%22corehub%22%7D%5D&tid=10");
+﻿var Socket = new WebSocket("wss://socket.bittrex.com/signalr/connect?transport=webSockets&clientProtocol=1.5&connectionToken=RUQEjFaeTkAQVSvlfE1JouRPHFq9JorlwboVHo3DbizRlT0dafUaRHF510MIfbtcJW5HnqhjlIvosGsCuogAjipV19bcJtQobl475E8HTolI88jov0zNnEsIH63FwOOOPcHMOQ%3D%3D&connectionData=%5B%7B%22name%22%3A%22corehub%22%7D%5D&tid=7");
 var currentObj = {};
 var eleObj = {};
 var currentS30 = [], currentM1 = [], currentM5 = {}, currentM15 = {}, currentM30 = {}, currentH1 = {}, currentH2 = {};
@@ -88,21 +88,22 @@ Socket.onmessage = function (evt) {
 };
 
 function getMarket() {
-    $.get("https://cors.io/?https://files.coinmarketcap.com/generated/stats/global.json")
+    $.get("https://files.coinmarketcap.com/generated/stats/global.json")
         .then(function (data) {
-            var obj = JSON.parse(data);
-            var totalMarket = obj.total_market_cap_by_available_supply_usd.toLocaleString(
+            console.log(data);
+            // // var obj = JSON.parse(data);
+            var totalMarket = data.total_market_cap_by_available_supply_usd.toLocaleString(
                 undefined, // use a string like 'en-US' to override browser locale
                 {minimumFractionDigits: 0}
             );
-            var totalVol = obj.total_volume_usd.toLocaleString(
+            var totalVol = data.total_volume_usd.toLocaleString(
                 undefined, // use a string like 'en-US' to override browser locale
                 {minimumFractionDigits: 0}
             );
-
+            //
             $('.totalMarket').text(totalMarket);
             $('.totalVol').text(totalVol);
-            $('.totalPercent').text(obj.bitcoin_percentage_of_market_cap.toFixed(2));
+            $('.totalPercent').text(data.bitcoin_percentage_of_market_cap.toFixed(2));
         });
 }
 function renderTable(current) {
@@ -210,8 +211,8 @@ function renderTableMinutes(currentM, classrender, classname, classprice, classv
         eleObj[value.MarketName].children('.openBuyOrder' + classname).children('.averageText').text(value.OpenBuyOrders);
         eleObj[value.MarketName].children('.openSellOrder' + classname).children('.averageText').text(value.OpenSellOrders);
 
-        averageColor(Number(eleObj[value.MarketName].children('.averagePrice' + classrender).children('.averageText').text()), averagePrice(value), value, classprice, 0.5);
-        averageColor(Number(eleObj[value.MarketName].children('.volume' + classrender).children('.averageText').text()), value.BaseVolume, value, classvolume, 0.4);
+        averageColor(Number(eleObj[value.MarketName].children('.averagePrice' + classrender).children('.averageText').text()), averagePrice(value), value, classprice, 0.3);
+        averageColor(Number(eleObj[value.MarketName].children('.volume' + classrender).children('.averageText').text()), value.BaseVolume, value, classvolume, 0.2);
         BuyColor(Number(eleObj[value.MarketName].children('.openBuyOrder' + classrender).children('.averageText').text()), value.OpenBuyOrders, value, classopenbuy);
         SellColor(Number(eleObj[value.MarketName].children('.openSellOrder' + classrender).children('.averageText').text()), value.OpenSellOrders, value, classopensell);
         alertPump(value);
@@ -398,12 +399,24 @@ function alertPump(obj) {
     if (eleObj[obj.MarketName].children('.volumeS30').hasClass('green-color')
         && eleObj[obj.MarketName].children('.openBuyOrderS30').hasClass('green-color')
         && eleObj[obj.MarketName].children('.openSellOrderS30').hasClass('green-color')) {
-        $.notify(obj.MarketName + " Đang tăng từ giá " + obj.Last, "success");
+        $.notify(obj.MarketName + " Đang Tăng từ giá " + obj.Last, "success");
     }
 
     if (eleObj[obj.MarketName].children('.volumeS30').hasClass('danger-color')
         && eleObj[obj.MarketName].children('.openBuyOrderS30').hasClass('danger-color')
         && eleObj[obj.MarketName].children('.openSellOrderS30').hasClass('danger-color')) {
         $.notify(obj.MarketName + " Đang Giảm từ giá " + obj.Last, "warn");
+    }
+
+    if (eleObj[obj.MarketName].children('.volume').hasClass('green-color')
+        && eleObj[obj.MarketName].children('.openBuyOrder').hasClass('green-color')
+        && eleObj[obj.MarketName].children('.openSellOrder').hasClass('green-color')) {
+        $.notify(obj.MarketName + "  Đang Tăng lúc này giá " + obj.Last, "info");
+    }
+
+    if (eleObj[obj.MarketName].children('.volume').hasClass('danger-color')
+        && eleObj[obj.MarketName].children('.openBuyOrder').hasClass('danger-color')
+        && eleObj[obj.MarketName].children('.openSellOrder').hasClass('danger-color')) {
+        $.notify(obj.MarketName + "  Đang Giảm lúc này giá " + obj.Last, "warn");
     }
 }
