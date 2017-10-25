@@ -4,7 +4,6 @@ var eleObj = {};
 var currentS30 = [], currentM1 = [], currentM5 = {}, currentM15 = {}, currentM30 = {}, currentH1 = {}, currentH2 = {};
 var triggerM1 = false, triggerS30 = false;
 var countM = 5;
-var realtimeM1 = {};
 var arrayEle = ['S30', 'M1', 'M5', 'M15', 'M30', 'H1', 'H2'];
 
 
@@ -216,6 +215,7 @@ function renderTableMinutes(currentM, classrender, classname, classprice, classv
         BuyColor(Number(eleObj[value.MarketName].children('.openBuyOrder' + classrender).children('.averageText').text()), value.OpenBuyOrders, value, classopenbuy);
         SellColor(Number(eleObj[value.MarketName].children('.openSellOrder' + classrender).children('.averageText').text()), value.OpenSellOrders, value, classopensell);
         alertPump(value);
+        checkPump(value);
     });
 }
 
@@ -419,4 +419,17 @@ function alertPump(obj) {
         && eleObj[obj.MarketName].children('.openSellOrder').hasClass('danger-color')) {
         $.notify(obj.MarketName + "  Đang Giảm lúc này giá " + obj.Last, "warn");
     }
+}
+
+function checkPump(obj) {
+   if(eleObj[obj.MarketName].children('.volumeS30').hasClass('green-color')
+     && eleObj[obj.MarketName].children('.volumeM1').hasClass('green-color')
+       && eleObj[obj.MarketName].children('.volumeM5').hasClass('green-color')
+       && eleObj[obj.MarketName].children('.volumeM15').hasClass('green-color')
+       && (eleObj[obj.MarketName].children('.openBuyOrderM1').hasClass('green-color') ||eleObj[obj.MarketName].children('.openBuyOrderM5').hasClass('green-color')
+       && eleObj[obj.MarketName].children('.openSellOrderM1').hasClass('danger-color') ||eleObj[obj.MarketName].children('.openSellOrderM5').hasClass('danger-color')
+       )
+   ){
+       $.notify(obj.MarketName + "  Có khả năng Pump từ giá  " + obj.Last, "success");
+   }
 }

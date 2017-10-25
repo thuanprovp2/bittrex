@@ -6,7 +6,7 @@ var eleObj = {};
 var listData = {};
 var loadFullData = false;
 var listCoin = [
-        "BTC-AMP", "BTC-AGRS", "BTC-ARK", "BTC-BLOCK", "BTC-BRK", "BTC-BRX", "BTC-BTS", "BTC-CANN", "BTC-CPC", "BTC-DAR", "BTC-DASH", "BTC-DCR",
+        "BTC-AMP", "BTC-AGRS", "BTC-ARK", "BTC-BLOCK", "BTC-BRK", "BTC-BRX", "BTC-CANN", "BTC-CPC", "BTC-DASH", "BTC-DCR",
         "BTC-ETH", "BTC-EXCL", "BTC-GAM", "BTC-GBG", "BTC-GRS", "BTC-GUP", "BTC-IOC", "BTC-IOP", "BTC-LTC", "BTC-NLG", "BTC-NXC", "BTC-PIVX",
         "BTC-PTOY", "BTC-QWARK", "BTC-RADS", "BTC-REP", "BTC-SIB", "BTC-SLS", "BTC-START", "BTC-STRAT", "BTC-SWIFT", "BTC-SYS", "BTC-TRIG", "BTC-TRST",
         "BTC-TX", "BTC-XCP", "BTC-XEL", "BTC-XMR", "BTC-XVG", "BTC-ZCL", "USDT-BCC", "USDT-ETH", "USDT-NEO", "USDT-XMR", "USDT-XRP", "USDT-ZEC",
@@ -15,15 +15,15 @@ var listCoin = [
         "BTC-SPR", "BTC-SYNX", "BTC-VTC", "BTC-ARDR", "BTC-BCC", "BTC-BITB", "BTC-CLOAK", "BTC-DCT", "BTC-DMD", "BTC-DOPE", "BTC-DYN", "BTC-LMC",
         "BTC-LUN", "BTC-MCO", "BTC-MLN", "BTC-NAV", "BTC-NEO", "BTC-NMR", "BTC-OK", "BTC-RISE", "BTC-STEEM", "BTC-SWT", "BTC-VIA", "BTC-XWC",
         "USDT-ETC", "BTC-ADX", "BTC-CURE", "BTC-DOGE", "BTC-ERC", "BTC-ZEC", "USDT-DASH", "BTC-KMD", "BTC-WAVES", "USDT-OMG", "BTC-APX",
-        "BTC-EMC", "BTC-SC", "BTC-BAT", "BTC-BTA", "BTC-XEM", "USDT-BTC", "BTC-ABY", "BTC-CVC", "BTC-EMC2", "BTC-GEO", "BTC-MTL", "BTC-MUSIC",
+        "BTC-EMC", "BTC-SC", "BTC-BAT", "BTC-XEM", "USDT-BTC", "BTC-ABY", "BTC-CVC", "BTC-EMC2", "BTC-GEO", "BTC-MTL", "BTC-MUSIC",
         "BTC-PKB", "BTC-XST", "BTC-XZC", "BTC-BSD", "BTC-SNT", "BTC-ANT", "BTC-GBYTE", "BTC-TIME", "BTC-XRP", "BTC-NEOS", "BTC-RLC", "BTC-GAME",
         "BTC-EBST", "BTC-1ST", "BTC-MAID", "BTC-VOX", "BTC-GRC", "BTC-ETC", "BTC-EXP", "BTC-MYST", "BTC-STORJ", "BTC-XVC", "BTC-GNT", "BTC-FTC",
         "BTC-XLM", "USDT-LTC", "BTC-CRB", "BTC-INCNT", "BTC-THC", "BTC-BTCD", "BTC-SLR", "BTC-VRC", "BTC-XDN", "BTC-VTR", "BTC-SNGLS", "BTC-PPC",
         "BTC-SBD", "BTC-CFI", "BTC-CLAM", "BTC-CRW", "BTC-ZEN", "BTC-SPHR", "BTC-UNB", "BTC-FUN", "BTC-CLUB", "BTC-WINGS", "BTC-DGB", "BTC-XAUR",
         "BTC-POT", "BTC-UBQ", "BTC-GLD", "BTC-PDC", "BTC-TRUST", "BTC-EFL", "BTC-BCY", "BTC-BNT", "BTC-FCT", "BTC-RDD", "BTC-XMG", "BTC-COVAL",
-        "BTC-TKN", "BTC-FAIR", "BTC-FLO", "BTC-PTC", "BTC-OMNI", "BTC-LGD", "BTC-AEON", "BTC-INFX", "BTC-AUR", "BTC-VRM", "BTC-XMY", "BTC-UNO",
+        "BTC-TKN", "BTC-FAIR", "BTC-FLO", "BTC-PTC", "BTC-OMNI", "BTC-LGD", "BTC-AEON", "BTC-INFX", "BTC-AUR", "BTC-VRM", "BTC-XMY",
         "BTC-BYC", "BTC-ION", "BTC-TKS", "BTC-RBY", "BTC-MEME", "BTC-BURST", "BTC-2GIVE", "BTC-FLDC", "BTC-NBT", "BTC-EGC", "BTC-GOLOS", "BTC-ENRG",
-        "BTC-DTB", "BTC-BLITZ", "BTC-PART", "BTC-DRACO", "FINISH"
+        "BTC-DTB", "BTC-BLITZ", "BTC-PART", "FINISH"
     ]
     // ,"ETH-WAVES", "ETH-ADT", "ETH-BCC", "ETH-BNT", "ETH-CRB", "ETH-CVC", "ETH-DASH", "ETH-GNO",
     // "ETH-GNT", "ETH-LUN", "ETH-NEO", "ETH-NMR", "ETH-PAY", "ETH-PTOY", "ETH-QRL", "ETH-STRAT", "ETH-TIME", "ETH-ZEC", "ETH-BTS", "ETH-CFI",
@@ -113,15 +113,17 @@ function getFullTick(name) {
         getLatestTick(listCoin[indexListCoin]);
     }
     else {
-        var link = "https://cors.io/?https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=" + name + "&tickInterval=thirtyMin";
+        var link = "https://cors-anywhere.herokuapp.com/https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=" + name + "&tickInterval=thirtyMin";
+
         $.get(link)
-            .then(function (data) {
-                var dataC = JSON.parse(data);
+            .then(function (dataC) {
+                // console.log(dataC);
+                // var dataC = JSON.parse(data);
                 if (Object.keys(dataC.result).length < 20) {
                     //do nothing
                 }
                 else {
-                    console.log(dataC);
+                    // console.log(dataC);
                     dataC.result.splice(0, dataC.result.length - 20);                   //xóa còn đúng 20 dữ liệu mới nhất
                     listData[name] = dataC.result;                                      //add vào listData
                     console.log(link);
@@ -145,10 +147,10 @@ function getLatestTick(name) {
         getLatestTick(listCoin[indexListCoin]);
     }
     else {
-        var link = "https://cors.io/?https://bittrex.com/Api/v2.0/pub/market/GetLatestTick?marketName=" + name + "&tickInterval=thirtyMin";
+        var link = "https://cors-anywhere.herokuapp.com/https://bittrex.com/Api/v2.0/pub/market/GetLatestTick?marketName=" + name + "&tickInterval=thirtyMin";
         $.get(link)
-            .then(function (data) {
-                var dataC = JSON.parse(data);
+            .then(function (dataC) {
+                // var dataC = JSON.parse(data);
                 if (dataC.result[0].T == listData[name][19].T) {
                     listData[name][19] = dataC.result[0];                   //thay lastest data vào phần tử cuối
                     console.log(link);

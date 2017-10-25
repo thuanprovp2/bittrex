@@ -5,7 +5,7 @@ var listData = {};
 var eleObj = {};
 var indexListCoin = 0;
 var listCoin = [
-    "BTC-AMP", "BTC-ARK", "BTC-BLOCK", "BTC-BRK", "BTC-BRX", "BTC-BTS", "BTC-DASH", "BTC-DCR",
+    "BTC-AMP", "BTC-ARK", "BTC-BLOCK", "BTC-BRK", "BTC-BRX", "BTC-DASH", "BTC-DCR",
     "BTC-ETH", "BTC-EXCL", "BTC-GAM", "BTC-GBG", "BTC-GRS", "BTC-GUP", "BTC-IOC", "BTC-IOP", "BTC-LTC", "BTC-NLG", "BTC-NXC", "BTC-PIVX",
     "BTC-PTOY", "BTC-QWARK", "BTC-RADS", "BTC-REP", "BTC-SIB", "BTC-SLS", "BTC-START", "BTC-STRAT", "BTC-SWIFT", "BTC-SYS", "BTC-TRIG", "BTC-TRST",
     "BTC-TX", "BTC-XCP", "BTC-XEL", "BTC-XMR", "BTC-XVG", "BTC-ZCL", "USDT-BCC", "USDT-ETH", "USDT-NEO", "USDT-XMR", "USDT-XRP", "USDT-ZEC",
@@ -14,15 +14,15 @@ var listCoin = [
     "BTC-SPR", "BTC-SYNX", "BTC-VTC", "BTC-ARDR", "BTC-BCC", "BTC-BITB", "BTC-CLOAK", "BTC-DCT", "BTC-DMD", "BTC-DOPE", "BTC-DYN", "BTC-LMC",
     "BTC-LUN", "BTC-MCO", "BTC-MLN", "BTC-NAV", "BTC-NEO", "BTC-NMR", "BTC-OK", "BTC-RISE", "BTC-STEEM", "BTC-SWT", "BTC-VIA", "BTC-XWC",
     "USDT-ETC", "BTC-ADX", "BTC-CURE", "BTC-DOGE", "BTC-ERC", "BTC-ZEC", "USDT-DASH", "BTC-KMD", "BTC-WAVES", "USDT-OMG", "BTC-APX",
-    "BTC-EMC", "BTC-SC", "BTC-BAT", "BTC-BTA", "BTC-XEM", "USDT-BTC", "BTC-ABY", "BTC-CVC", "BTC-EMC2", "BTC-GEO", "BTC-MTL", "BTC-MUSIC",
+    "BTC-EMC", "BTC-SC", "BTC-BAT", "BTC-XEM", "USDT-BTC", "BTC-ABY", "BTC-CVC", "BTC-EMC2", "BTC-GEO", "BTC-MTL", "BTC-MUSIC",
     "BTC-PKB", "BTC-XST", "BTC-XZC", "BTC-BSD", "BTC-SNT", "BTC-ANT", "BTC-GBYTE", "BTC-TIME", "BTC-XRP", "BTC-NEOS", "BTC-RLC", "BTC-GAME",
     "BTC-EBST", "BTC-1ST", "BTC-MAID", "BTC-VOX", "BTC-GRC", "BTC-ETC", "BTC-EXP", "BTC-MYST", "BTC-STORJ", "BTC-XVC", "BTC-GNT", "BTC-FTC",
     "BTC-XLM", "USDT-LTC", "BTC-CRB", "BTC-INCNT", "BTC-THC", "BTC-BTCD", "BTC-SLR", "BTC-VRC", "BTC-XDN", "BTC-VTR", "BTC-SNGLS", "BTC-PPC",
     "BTC-SBD", "BTC-CFI", "BTC-CLAM", "BTC-CRW", "BTC-ZEN", "BTC-SPHR", "BTC-UNB", "BTC-FUN", "BTC-CLUB", "BTC-WINGS", "BTC-DGB", "BTC-XAUR",
     "BTC-POT", "BTC-UBQ", "BTC-GLD", "BTC-PDC", "BTC-TRUST", "BTC-EFL", "BTC-BCY", "BTC-BNT", "BTC-FCT", "BTC-RDD", "BTC-XMG", "BTC-COVAL",
     "BTC-TKN", "BTC-FAIR", "BTC-FLO", "BTC-PTC", "BTC-OMNI", "BTC-LGD", "BTC-AEON", "BTC-INFX", "BTC-AUR", "BTC-VRM", "BTC-XMY", "BTC-UNO",
-    "BTC-BYC", "BTC-ION", "BTC-TKS", "BTC-RBY", "BTC-MEME", "BTC-BURST", "BTC-2GIVE", "BTC-FLDC", "BTC-CANN", "BTC-CPC", "BTC-DAR", "BTC-NBT", "BTC-EGC", "BTC-GOLOS", "BTC-ENRG",
-    "BTC-DTB", "BTC-AGRS", "BTC-BLITZ", "BTC-PART", "BTC-DRACO", "FINISH"
+    "BTC-BYC", "BTC-ION", "BTC-TKS", "BTC-RBY", "BTC-MEME", "BTC-BURST", "BTC-2GIVE", "BTC-FLDC", "BTC-CANN", "BTC-CPC", "BTC-NBT", "BTC-EGC", "BTC-GOLOS", "BTC-ENRG",
+    "BTC-DTB", "BTC-AGRS", "BTC-BLITZ", "BTC-PART", "FINISH"
 ];
 var countM = 15;
 
@@ -119,7 +119,7 @@ function getMarketHistory(name) {
         renderMarketHistory(listData);
     }
     else {
-        var link = "https://cors.io/?https://bittrex.com/api/v1.1/public/getmarkethistory?market=" + name;
+        var link = "ghttps://bittrex.com/api/v1.1/public/getmarkethistory?market=" + name;
         console.log(link);
         $.get(link)
             .then(function (data) {

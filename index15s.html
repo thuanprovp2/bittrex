@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script rel="stylesheet" href="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="assets/js/notify.js"></script>
+    <script src="bower_components/jquery.floatThead/dist/jquery.floatThead.js"></script>
+    <script src="bower_components/ramda/dist/ramda.js"></script>
+    <script src="assets/js/index15s.js"></script>
+    <style>
+        .notifyjs-fastPump-base {
+            white-space: nowrap;
+            background-color: #38BB38;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="col-md-12">
+    <div class="row" style="margin-bottom:5px">
+        <div class="col-xs-6">
+            <h2 class="featurette-heading top-header text-center" style="padding: 0">
+                BƠI CÙNG CÁ HEO
+            </h2>
+        </div>
+        <div class="col-xs-6">
+            <form class="form-inline" style="float:right;margin-top:3%">
+                <div class="form-group">Tìm kiếm
+                    <input type="text" class="form-control">
+                </div>
+            </form>
+        </div>
+        <div>
+            <h2>Vốn hóa hiện tại: <strong class="totalMarket"></strong> $</h2>
+            <h2>24h Vol: <strong class="totalVol"></strong> $</h2>
+            <h2>Bitcoin percent: <strong class="totalPercent"></strong> %</h2>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped table-condensed table-bordered" style="margin-left: 0; width: 100%;"
+       id="demo">
+    <thead>
+    <tr>
+        <th> Name</th>
+        <th> Last Price</th>
+        <th class="averagePrice"> Average Price</th>
+        <th class="averagePriceS15"> Average Price S15</th>
+        <th class="averagePriceS30"> Average Price S30</th>
+        <th class="averagePriceM1"> Average Price M1</th>
+        <th> % Change</th>
+        <th class="volume"> Volume</th>
+        <th class="volumeS15"> Volume S15</th>
+        <th class="volumeS30"> Volume S30</th>
+        <th class="volumeM1"> Volume M1</th>
+
+        <th class="openBuyOrder"> Open Buy Order</th>
+        <th class="openBuyOrderS15"> Open Buy Order S15</th>
+        <th class="openBuyOrderS30"> Open Buy Order S30</th>
+        <th class="openBuyOrderM1"> Open Buy Order M1</th>
+
+        <th class="openSellOrder"> Open Sell Order</th>
+        <th class="openSellOrderS15"> Open Sell Order S15</th>
+        <th class="openSellOrderS30"> Open Sell Order S30</th>
+        <th class="openSellOrderM1"> Open Sell Order M1</th>
+
+        <th> Order Alert</th>
+        <th> 24Hr High</th>
+        <th> 24Hr Low</th>
+        <th> Ask</th>
+        <th> Bid</th>
+        <th> % Spread</th>
+        <th> Price Alert</th>
+        <!--<th> Buy Wall</th>-->
+        <!--<th> Sell Wall</th>-->
+        <!--<th> Sum Buy</th>-->
+        <!--<th> Sum Sell</th>-->
+        <!--<th> Sum Alert</th>-->
+    </tr>
+    </thead>
+    <!--page 1-->
+    <tbody id="table">
+    </tbody>
+</table>
+</body>
+</html>
